@@ -1,0 +1,9 @@
+ProofPulse test evidence preparation — 24 October 2026
+Local Python 3.13 source compile: PASS
+Offline mocked SDK unit tests: 18/18 PASS (rerun in container)
+GenLayer Direct Mode: NOT RUN LOCALLY; GitHub CI job must pass
+GenVM lint: NOT RUN LOCALLY; GitHub CI job must pass
+Network integration test: WRITTEN, NOT YET EXECUTED; manual workflow dispatch only
+Live deployed address and transaction hashes: NONE YET
+Award/Portal acceptance: NOT CLAIMED
+No private keys or real personal credentials are included.

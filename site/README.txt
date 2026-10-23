@@ -1,0 +1,1 @@
+ProofPulse is a static, offline educational simulator. Its source display is synced to contracts/proof_pulse.py. It does not call GenLayer, prove deployment, provide genuine monitoring, or connect wallets.

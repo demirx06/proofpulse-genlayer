@@ -1,0 +1,11 @@
+PROOFPULSE — 2 ISLEMDE GITHUB'A YUKLEME
+
+1) Kardesinin GitHub hesabinda proofpulse-genlayer isimli Public bos depo ac. Bu ZIP'i ayikla, ana klasordeki tum dosya ve klasorleri Add file > Upload files ekranina surukleyip Commit changes yap.
+
+2) GitHub tarayici yuklemesi gizli .github klasorunu almiyorsa Add file > Create new file ac, dosya adi .github/workflows/ci.yml olsun. Bu ZIP'teki GITHUB_WORKFLOW_KOPYALA.txt dosyasinin TAM ICERIGINI yapistirip Commit changes yap.
+
+GitHub Actions > ProofPulse GenLayer verification and Studionet proof kisminda otomatik contract-verify testinin yesil olmasini kontrol et.
+
+Gercek ag testi SADECE DAHA SONRA manuel onayla: Run workflow -> kutuya RUN_STUDIONET_TEST yaz. Bu islem gercek testnet islemleri yapar. Once CI basarili olmali. Testin sonucuna gore Portala basvuru hazirlanir; 100 puan garanti edilmez.
+
+Diger GitHub hesabindan token, sifre veya ozel anahtar gerekmiyor; hicbirini kimseyle paylasma.
