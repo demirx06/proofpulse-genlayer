@@ -1,0 +1,48 @@
+name: ProofPulse GenLayer verification and Studionet proof
+on:
+  push:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: 'Type RUN_STUDIONET_TEST to authorize real Studionet test transactions'
+        required: true
+        type: string
+permissions:
+  contents: read
+jobs:
+  contract-verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install official GenLayer test dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Check Python syntax
+        run: python -m compileall -q contracts tests
+      - name: Offline tests
+        run: python -m pytest tests/offline -q
+      - name: Official GenLayer Direct Mode tests
+        run: python -m pytest tests/direct -q
+      - name: GenVM lint
+        run: genvm-lint check contracts/proof_pulse.py
+      - name: Source digest
+        run: sha256sum contracts/proof_pulse.py
+  studionet-proof:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.confirmation == 'RUN_STUDIONET_TEST' }}
+    needs: contract-verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install official GenLayer network test dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Record deployed source digest
+        run: sha256sum contracts/proof_pulse.py
+      - name: Studionet deploy, reported incidents, independent auditor, consensus and readback
+        run: gltest tests/integration/test_studionet.py -v -s --network studionet
