@@ -2,6 +2,10 @@
 
 This test explicitly distinguishes self-reported latency from verified monitoring.
 It must run only via a separately authorized manual workflow dispatch.
+
+SDK compatibility: gltest v0.29 ContractFunction.transact() does NOT accept an
+`account` argument. For calls signed by a different account, bind the deployed
+contract to the desired signer with `contract.connect(other_account)`.
 """
 import hashlib
 import json
@@ -37,7 +41,7 @@ def test_proofpulse_studionet_lifecycle(default_account, accounts):
 
     receipt = contract.configure_service(
         args=['Inference API Demo', 2000, str(auditor.address)]
-    ).transact(account=default_account, wait_interval=10000, wait_retries=50)
+    ).transact(wait_interval=10000, wait_retries=50)
     assert tx_execution_succeeded(receipt)
     print('CONFIGURE_SERVICE_TX=' + str(receipt.get('hash', '')), flush=True)
     sla = json.loads(str(contract.get_sla().call()))
@@ -48,13 +52,15 @@ def test_proofpulse_studionet_lifecycle(default_account, accounts):
     receipt = contract.report_incident(args=[
         '/v1/infer', 1250, LOG,
         'A customer reported a response within the published threshold in an example test.'
-    ]).transact(account=default_account, wait_interval=10000, wait_retries=50)
+    ]).transact(wait_interval=10000, wait_retries=50)
     assert tx_execution_succeeded(receipt)
     print('WITHIN_SLA_REPORT_TX=' + str(receipt.get('hash', '')), flush=True)
     within = json.loads(str(contract.get_incident(args=['0']).call()))
     assert within['reported_breach'] is False
-    receipt = contract.assess(args=['0']).transact(
-        account=auditor, wait_interval=10000, wait_retries=50,
+
+    auditor_contract = contract.connect(auditor)
+    receipt = auditor_contract.assess(args=['0']).transact(
+        wait_interval=10000, wait_retries=50,
     )
     assert tx_execution_succeeded(receipt)
     print('WITHIN_SLA_ASSESS_TX=' + str(receipt.get('hash', '')), flush=True)
@@ -63,7 +69,7 @@ def test_proofpulse_studionet_lifecycle(default_account, accounts):
 
     # Above-threshold report goes through validator-backed semantic assessment.
     receipt = contract.report_incident(args=['/v1/infer', 3500, LOG, WHY]).transact(
-        account=default_account, wait_interval=10000, wait_retries=50,
+        wait_interval=10000, wait_retries=50,
     )
     assert tx_execution_succeeded(receipt)
     print('BREACH_REPORT_TX=' + str(receipt.get('hash', '')), flush=True)
@@ -75,9 +81,8 @@ def test_proofpulse_studionet_lifecycle(default_account, accounts):
     }, sort_keys=True)
     assert submitted['evidence_hash'] == hashlib.sha256(evidence.encode()).hexdigest()
 
-    receipt = contract.assess(args=['1']).transact(
-        account=auditor, consensus_max_rotations=4,
-        wait_interval=10000, wait_retries=80,
+    receipt = auditor_contract.assess(args=['1']).transact(
+        consensus_max_rotations=4, wait_interval=10000, wait_retries=80,
     )
     assert tx_execution_succeeded(receipt)
     print('CONSENSUS_REVIEW_TX=' + str(receipt.get('hash', '')), flush=True)
